@@ -124,6 +124,12 @@ def launch_bdjuno_service(plan, postgres_service, node_service, chain_name):
 
 
 def launch_hasura_service(plan, postgres_service, chain_name):
+    # Upload updated metadata files with subscription permissions
+    metadata_artifact = plan.upload_files(
+        src="github.com/LZeroAnalytics/bdjuno/hasura",
+        name="{}-hasura-metadata".format(chain_name)
+    )
+    
     hasura_service = plan.add_service(
         name = "{}-hasura".format(chain_name),
         config = ServiceConfig(
@@ -143,6 +149,9 @@ def launch_hasura_service(plan, postgres_service, chain_name):
                 "HASURA_GRAPHQL_METADATA_DIR": "/hasura/metadata",
                 "ACTION_BASE_URL": "http://{}-bdjuno-service:3000".format(chain_name),
                 "HASURA_GRAPHQL_SERVER_PORT": "8080"
+            },
+            files = {
+                "/hasura": metadata_artifact
             }
         )
     )
